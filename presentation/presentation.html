@@ -18,8 +18,7 @@ class: center, middle, transition, intro
 - This talk is inspired by George Orwell's book: 1984 
 - Although the book paints quite a negative picture of reality 
 - In this talk, I'm going to try and show you how we can translate ideas from the book into good programming practices
-- With a focus on typed-functional-programming
-- The code examples in the talk are going to be in Scala, but should be accessible to anyone with some experience with typed-FP
+- Especially in the world of type-functional programming
 - But first, a quick recap of the book
 
 ---
@@ -61,7 +60,7 @@ class: center, middle, transition, intro
 
 ???
 - Newspeak
-- Which a language that was specifically designed to limit the mind in the ability to express complicated or forbidden thoughts
+- Which a language that was specifically designed to limit the freedom of thought
 --
 
   - Thoughtcrime
@@ -78,7 +77,7 @@ class: center, middle, transition, intro
 - Instead of keeping both the word "good" and "bad", we can reuse "good", with a generic prefix for negation
 - And the focus of the talk:
 ---
-## 1984 - Recap
+## The Slogans
 
 .slogans[
 WAR IS PEACE
@@ -90,7 +89,7 @@ IGNORANCE IS STRENGTH
 
 ???
 - These are the slogans of the party (reads them out loud)
-- Of course, these slogans may seem to you as somewhat excessively negative
+- Of course, these slogans may seem somewhat excessively negative
 - How could we possibly use them for anything constructive?
 - But, as we are going to see during the talk, each slogan maps neatly into concrete techniques that can be used to improve our programs
 - So, we are going to go over the slogans, one by one, and explore this connection
@@ -125,16 +124,14 @@ IGNORANCE IS STRENGTH
 - On to our first slogan
 
 ---
-class: center, middle, transition, orwell
+class: center, middle, transition
 
 WAR IS PEACE
 
 ???
 - War is Peace
-- Some of the examples that I'm going to show are probably quite familiar to you
-- But apart from the concrete details of the examples, I'll try to illustrate a certain way of thought
-- So hopefully this will be interesting despite familiarity
-
+- We are going to start with some simple and a familiar examples
+- And we'll gradually build up to more complicated examples
 ---
 
 ## Peace
@@ -176,55 +173,24 @@ InputData getFieldQuery(Form form,  MetaData meta) {
 
 ???
 - You don't actually need to read into this code
-- It's here just to intimidate
-- But if you happen to work with something like Java, this should look pretty familiar
---
+- It's here just to intimidate, so let's hide it away
+---
 
-<div class="enemiesOfThePeople">
-<h3>Enemies of the People</h3>
+## Enemies of the People
 
-<ul>
-{{content}}	
-</ul>
+- Side effects / Mutability
+- Nullability
+- Exceptions
+- Multiplicity
 
-</div>
 
 ???
 - The point is, that this code embraces a number of enemies, and tries to live with them in peace
 - These are:
-
---
-
-<li>Side effects / Mutability</li>
-
-{{content}}
-
-???
 - Side effects and mutability that pollute the code, making reasoning about it more difficult
---
-
-<li>Nullability</li>
-
-{{content}}
-
-???
 - The usage of `null`s, that is propagated everywhere, covering the code with repetitive `null` checks
---
-
-<li>Exceptions</li>
-
-{{content}}
-
-???
 - Exceptions, that need to be explicitly handled and wrapped around
 - And just as with `null`s, once we start using them, they pollute the code all around us
---
-
-<li>Multiplicity</li>
-
-{{content}}
-
-???
 - The last enemy is a bit more subtle
 - It is the code in this loop, which forces the code to do some gymnastics (including side-effects) in order to perform the same bit of a code a number times
 - All of these enemies are instances "effects" in our code
@@ -294,31 +260,26 @@ eval(Add(Val(2), Val(2)))
 ---
 ## Side Effects and Mutability
 
-???
-- The first enemy is side effects and mutability
-- I don't need to actually convince you that they are indeed dangerous
---
 
 .quoteBox.sideEffects[
 > The whole aim of Newspeak is to narrow the range of thought. In the end we shall make thoughtcrime literally impossible, because there will be no words in which to express it.
 ]
 
 ???
+- The first enemy is side effects and mutability
+- I don't need to actually convince you that they are indeed dangerous
 - So much so, that ideally, the language that we are using should make them difficult to express freely
 - Scala, and many other languages are not that good at it
 - But for the rest of the talk, I'm just going to pretend, that side effects do not exist at all
 ---
 ## Nullability
 
-???
-- Our next enemy is nullability
---
-
 .quoteBox.nullability[
 > Syme was not only dead, he was abolished, an unperson.
 ]
 
 ???
+- Our next enemy is nullability
 - This is the case when something can be potentially missing
 - Like the unpersons in the book
 - Since we are dealing with numbers, we are going to make a number disappear, like so
@@ -366,7 +327,7 @@ eval(Add(Val(3), Val(7))) // null
 ???
 
 - In order to fight this enemy, we need to really understand its nature
-- Since we're into type-functional programming, we're going to use types to describe it
+- And we're going to use types to describe it
 
 --
 
@@ -480,22 +441,14 @@ def eval(e: Exp): Nullable[Int] = e match {
 - While still maintaining the same level of safety
 - Though nicer, nullability still takes a toll on our code, by somewhat hiding the actual logic from us in to levels of nesting
 - With a bit of practice, this usage pattern becomes quite recognizable
+- If you squint hard enough, you might discern it
 
---
-
-.quoteBox.nullabiltyMonoid[
-> A monoid in the category of endofunctors...
-]
-
-???
-- If you squint hard enough, you might discern a monoid in the category of whatnot
-- Known by its more common name:
 ---
 
 ## Nullability
 
 ```
-trait Monad[F[_]] extends Functor[F] {
+trait Monad[F[_]] {
 	
   def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
 }
@@ -532,7 +485,7 @@ def eval(e: Exp): Nullable[Int] = e match {
 ???
 - We are using "monad comprehensions", which is just syntactic sugar for applications of `flatMap`
 - In this formulation, our actual logic is no longer obscured by nesting
-- Now our code lives in the "happy path"
+- Now our code lives on the "happy path"
 - We are only looking at the case where the data is present, and the rest is handled by `flatMap`
 - Having completely isolated the enemy, behind a type and the `Monad` abstraction, the code is in real peace
 - We can move on to the next enemy
@@ -560,16 +513,12 @@ sealed trait Except[+Error, +A]
 
 case class Okay[+A](value: A) 
   extends Except[Nothing, A]
-{{content}}
-
-???
-- The first, `Okay` is when the value is present
---
 
 case class Bad[+Error](error: Error) 
   extends Except[Error, Nothing]
 
 ???
+- The first, `Okay` is when the value is present
 - The second, `Bad` is when there isn't a value
 - But we are not completely empty this time, instead we have an error value
 - Since the `Monad` interface from before worked so well, we're going to define `flatMap` right away
@@ -635,7 +584,7 @@ eval(Mul(Val(3), Val(4)))
 - And now for the last enemy
 ---
 
-## Multiplicity (A.K.A. Nondeterminism)
+## Multiplicity
 
 .quoteBox.multiplicity[
 > ‒ How can I help seeing what is in front of my eyes? <br /> Two and two are four.
@@ -644,7 +593,7 @@ eval(Mul(Val(3), Val(4)))
 ]
 
 ???
-- Multiplicity is conventionally called nondeterminism, in the sense that we can produce a number of possible results
+- Multiplicity means that a single computation can yield multiple results
 - I just find that name a bit confusing in our case
 - Anyways, that's exactly what the hero of the book experiences
 - Somehow the result of two and two can be many things at once
@@ -658,7 +607,7 @@ trait List[+A]
 ```
 
 ???
-- Well having many possible values is to a be a list of things
+- Well, having many possible values is to a be a list of things
 - `List` already defines a `flatMap` in the obvious way, so we can skip to the implementation
 
 --
@@ -704,7 +653,8 @@ eval { // List(18, 24, 30, 40)
 
 ???
 - To recap
-- We should recognize the enemies of our code for what they are
+- We should recognize the enemies in our code for what they are
+- Effects, such as nullability and exceptions
 
 --
 
@@ -725,17 +675,19 @@ eval { // List(18, 24, 30, 40)
 
 - Let your code live in peace
 
-.quoteBox.warIsPeace[
->  We do not merely destroy our enemies; we change them.
-]
+
 
 ???
 - Once you've done all that, having opened an all out war against the various effects
 - Your code can be truly be in peace
-- (reads the quote out loud)
 ---
 
-class: center, middle, transition, orwell
+.quoteBox.warIsPeace[
+>  We do not merely destroy our enemies; we change them.
+]
+---
+
+class: center, middle, transition
 
 FREEDOM IS SLAVERY
 
@@ -993,7 +945,7 @@ val badExp = for {
 - So your boss comes in and tells you:
 - What you did there, that's censorship
 - Which is great, let's make more of it
-- Though the censorship here is quite primitive, let's make it more sophisticated
+- Though the censorship here is quite primitive, we'll make it more sophisticated
 ---
 
 ## Censorship
@@ -1014,10 +966,11 @@ val badExp = for {
 - Let's come up with a type that describes this problem:
 
 --
+.bigCode[
 ```
 type Censor = Exp => Except[String, Exp]
 ```
-
+]
 ???
 - As you can see, the `Censor` type has all of the ingredients we need
 - We take an experssion as input
@@ -1153,29 +1106,7 @@ rule(Add(Val(7),
 - The magic didn't quite work out this time
 ---
 
-## The Missing Errors
-
-```
-case Add(a, b) =>
-  rule(a).flatMap { censoredA =>
-    rule(b).map { censoredB =>
-      Add(censoredA, censoredB)
-    }
-  }
-```
-
-???
-- If we think about it a bit, the reason is actually apparent
-- The `for` syntax from before desugars into `flatMap`/`map`
-- When written like that, we can see why we don't collect any errors
-- The invocation of `rule` on the second argument, happens inside the function passed into `flatMap`
-- But this function can only be invoked if the result of `rule` on `a` actually produces some result
-- Since we have to pass that result into the function
-- But if the first `rule` invocation fails, there isn't anything to pass
-- So we are short-circuiting on the first error, and never have a chance to find any others
----
-
-## The Missing Errors
+## Collecting Errors
 
 .bigBrotherEnters.centered[![](big-brother-is-watching.jpg)]
 
@@ -1188,6 +1119,7 @@ case Add(a, b) =>
 
 ???
 - Which saddens him greatly
+- He worked so hard to formulate these messages
 - Of course he can be sad for only so long
 --
 
@@ -1204,7 +1136,7 @@ class: middle
 
 ???
 - Congratulations, you've been vaporized, you're now an unperson
-- So what actually went wrong?
+- So what actually went wrong this time?
 
 ---
 
@@ -1229,13 +1161,14 @@ trait Monad[F[_]] {
 
 ???
 - By only inspecting the signature of `flatMap` we can deduce that this is the wrong type
-- We can think of `F` some sort of action
+- We can think of `F` as some sort of an action
 - So the signature can be read like that:
 - Given an action that produces a value of type `A`
 - Inspect the `A` value and choose a second action that produces a `B`
 - This would be the result of the whole process
 - Of course, if the first action never produces a value, like the failing branch of `Except`
 - Then we never actually have a chance to choose the second action, since there isn't an `A` value to use for that choice
+- `flatMap` short-circuits the computation
 - Going at it from another point of view:
 - `flatMap` gives us a lot of freedom: freedom to choose the next action based on the results of the previous action
 - But if we look at our specific use case
@@ -1245,13 +1178,14 @@ trait Monad[F[_]] {
 ```
 case Add(a, b) =>
   rule(a).flatMap { censoredA =>
-    rule(b).map { censoredB =>
-      Add(censoredA, censoredB)
+    rule(b).flatMap { censoredB =>
+      Okay(Add(censoredA, censoredB))
     }
   }
 ```
 
 ???
+- This is the translation of the `for` comprehension syntax back into `flatMap`s
 - We never fully used the freedom that was given to us
 - Since the second action, `rule` of `b` is independent of the result of the first action, `rule` of `a`
 - There really isn't any need to chain them one after another like that
@@ -1314,16 +1248,9 @@ trait Monad[F[_]] extends Applicative[F] {
 - And it's impossible to implement `flatMap` with only `map2` and `unit`
 - But what's important for our purposes is that `map2` doesn't give us too much freedom
 - If we think of `F` as some kind of action
-- Then `map2` says that given some action that produces an `A`, an action that produces a `B`, and a function that combines `A` and `B` into a `C` value
-- We can create a combined action that produces a `C`
-- Both the `A` action and the `B` actions are evaluated independently of each other
+- Then `map2` lets us combine two actions into one
+- But notice how the two actions are independent of each other
 - And so we are not free to choose `F` of `B` based on `F` of `A` result, it is already predetermined for us
-- Generally speaking, a chain of computations created using `map2` has a simple structure
-- It's a bunch of independent actions whose result can be combined into a single action
-- Contrast to that, a chain of computations using `flatMap`, can have a much more complicated structure, since the next action is dependent on the result of the previous action
-- A complex structure, means that some information cannot be extracted from it
-- And in our case that's why we couldn't collect all errors from a chain of computations
-- But the `Applicative` structure is highly constrained
 - This constraint, or lack of freedom, gives us a way to extract information that was not possible with `Monad`
 - In our case, this will let us collect errors, let's see how
 ---
@@ -1357,8 +1284,10 @@ def map2[A, B, C](fa: Censorship[A], fb: Censorship[B])
                  (f: (A, B) => C): Censorship[C] =
   (fa, fb) match {
     case (Pass(a), Pass(b)) => Pass(f(a, b))
+    
     case (Fail(errors), Pass(_)) => Fail(errors)
     case (Pass(_), Fail(errors)) => Fail(errors)
+    
     case (Fail(errors1), Fail(errors2)) => 
       Fail(errors1 ++ errors2)
   }
@@ -1477,18 +1406,19 @@ rule(Add(Val(7),
 
 - Freedom can be quantified
 
-.quoteBox.freedomIsSlavery[
-> Freedom is the freedom to use abstract algebra <br/> at work. If that is granted, all else follows.
-]
-
 ???
 - Once you start using well-defined mathematical abstractions like `Functor`, `Applicative` and `Monad` and the many others available to you
 - Freedom becomes something that can be quantified
 - And you can choose the right amount of freedom by going up and down the abstraction ladder
+---
+
+.quoteBox.freedomIsSlavery[
+> Freedom is the freedom to use abstract algebra <br/> at work. If that is granted, all else follows.
+]
 
 ---
 
-class: center, middle, transition, orwell
+class: center, middle, transition
 
 IGNORANCE IS STRENGTH
 
@@ -1556,7 +1486,7 @@ def addTwo[A](a: A): A {{content}}
 
 {{content}}
 ???
-- Which is the only possible implementation (given the we ignore the enemies on the previous slide)
+- Which is the only possible implementation (given that we ignore the enemies on the previous slide)
 - This property that helps us reason about the code is called parametricity
 - Which in our case translates to: the less we know about our inputs, the more our outputs are constrained
 - So we can deduce some facts about parametric functions, from ignorance we've gained strength
@@ -1566,6 +1496,9 @@ def addTwo[A](a: A): A {{content}}
 
 def doSomething(is: List[Int]): List[Int]
 
+
+def doSomething[A](as: List[A]): List[A]
+
 {{content}}
 
 ???
@@ -1573,13 +1506,6 @@ def doSomething(is: List[Int]): List[Int]
 - We are operating on a concrete type, we know everything there is to know about it
 - So the solution space is huge, an we can't really say what this function does
 - But we can erase the knowledge about the type, like so
---
-
-def doSomething[A](as: List[A]): List[A]
-
-{{content}}
-
-???
 - Since this function is more complicated than the identity function
 - I can't actually determine its implementation from its signature
 - But I can still say something about it
@@ -1592,17 +1518,13 @@ def doSomething[A](as: List[A]): List[A]
 
 def swap(x: (Int, Int)): (Int, Int) = (x._1, x._2)
 
-{{content}}
+
+def swap[A, B](ab: (A, B)): (B, A) = (ab._1, ab._2)
 
 ???
 - See the bug here?
 - I most likely wanted to swap the two items, but I messed that up
 - Let's erase some the specifics of this function, and make it parametric
---
-
-def swap[A, B](ab: (A, B)): (B, A) = (ab._1, ab._2)
-
-???
 - This is as general as it gets
 - Now by just reading the signature of the function, we know that it has to swap its inputs
 - But what's more important, the compiler knows that as well
@@ -1697,7 +1619,7 @@ toExpEvaluate(BinaryOp(Mult, Val2(4),
 - And tells you that actually, our clients are going crazy, they are building huge expression trees
 - But our new evaluation function is quite wasteful.
 - It takes two up-and-down traversals of the tree to actually evaluate it
-- First on translation and the on evaluation
+- First on translation and then on evaluation
 - And Big Brother cares about performance quite a bit
 - So what can we do?
 
@@ -1716,7 +1638,7 @@ def eval(e: Exp): Int = e match {
 
 ???
 - If we look at the original `eval` function, we see that we have a problem
-- The traversal of the tree it built into the function
+- The traversal of the tree is built into the function
 - That's the recursive calls here
 - If we could somehow remove the traversal, maybe we could fuse it with our translation function
 - Actually this pattern is quite repetitive, here's another tree-traversing function
@@ -1782,6 +1704,7 @@ case class ValStep(x: Int) extends ExpStep[Nothing]
 - Notice how the recursion from before was replaced by the values that we are supposed to compute
 - So `AddStep` combines two `A` values, and so does `MulStep`
 - `ValStep` wasn't recursive, so it just holds a number
+- We've stripped away from the type the knowledge about its recursive nature
 - So how does the `eval` function looks like now?
 
 ---
@@ -1806,7 +1729,7 @@ def evalStep(expStep: ExpStep[Int]): Int =
 - Same goes for `MulStep` 
 - `ValStep` just produces its result
 - Notice how this function holds only the logic of evaluation, but not any of the recursion
-- We can do the same thing the translation function
+- We can do the same thing with the translation function
 
 --
 
@@ -1821,12 +1744,12 @@ def toExpStep(exp2: Exp2): ExpStep[Exp2] = exp2 match {
 ???
 - We are now converting a single layer of `Exp2` into a single `ExpStep`
 - The first branch can be read as follows:
-- Suppose you have a `BinaryOp` with two subexpressions, how will you convert it to a single `ExpStep`?
+- Given `BinaryOp` with two subexpressions, how will you convert it to a single `ExpStep`?
 - Take the parts of the `BinaryOp` and wrap them in an `AddStep` constructor
 - The result is an `ExpStep` that holds chunks of `Exp2` in it
 - On our next step, we can enter these chunks and convert them again
 - Notice how this version of the translation function is only translation logic, but non of the recursion
-- But can we actually fuse the two functions
+- But can we actually fuse the two functions?
 ---
 
 ## Fusion
@@ -1875,7 +1798,7 @@ def fuse[F[_], A, B](fromA: A => F[A],
 - What could we possibly do with a value of type `F`?
 - We have no interface to work with it
 - We need a bit more knowledge to solve our problem
-- Luckily, we are already familiar with a very simplistic interface that work with types like `F`
+- Luckily, we are already familiar with a very simplistic interface that works with types like `F`
 ---
 
 ## Interface
@@ -1890,45 +1813,13 @@ trait Functor[F[_]] {
 - That's the `Functor` type that we saw before, it lets us map inside of `F`
 - Given an `F` of `A` we can take a function from `A` to `B` and produce an `F` of `B`
 - That's the most minimal interface we could have
-- To actually use it with our problem, we need to implement it for `ExpStep`
-- But that's quite straightforward
---
-
-```
-sealed trait ExpStep[+A] {
-  def map[B](f: A => B): ExpStep[B] = this match {
-    case AddStep(a, b) => AddStep(f(a), f(b))
-    case MulStep(a, b) => MulStep(f(a), f(b))
-    case ValStep(x) => ValStep(x)
-  }
-}
-```
-
-???
-- We just go case by case over our datatype and apply `f` to its contents
-- Except `ValStep` which doesn't have anything relevant to `f`, and so we just ignore it
-- Here's the new `fuse` signature:
-
---
-
-```
-def fuse[F[_]: Functor, A, B](fromA: A => F[A], 
-                              toB: F[B] => B)(a: A): B
-```
-
-???
-- It reads as:
-- Given an `F` which implements a `Functor`, and the types `A` and `B`
-- A function that builds `F` of `A` from `A`, and a function that reduces `F` of `B` to `B`
-- Take an `A` value and produce a `B` value
-- That's as ignorant as we can be, we've removed any irrelevant details from our problem
-- Let's implement it
-
+- With that in hand, here's the new `fuse` signature:
 ---
+
 ## Follow the Types
 
 ```
-def fuse[A, B, F[_]: Functor](fromA: A => F[A], 
+def fuse[F[_]: Functor, A, B](fromA: A => F[A], 
                               toB: F[B] => B)(a: A): B = {
   {{content}}                             
 ```
@@ -1936,6 +1827,12 @@ def fuse[A, B, F[_]: Functor](fromA: A => F[A],
 .fuseBrace[```}```]
 
 ???
+- It reads as:
+- Given an `F` which implements a `Functor`, and the types `A` and `B`
+- A function that builds `F` of `A` from `A`, and a function that reduces `F` of `B` to `B`
+- Take an `A` value and produce a `B` value
+- That's as ignorant as we can be, we've removed any irrelevant details from our problem
+- And now we can implement it
 - One of the bonuses of working with such abstract types, is that the solution is so constrained that we can just "follow the types" to solve it
 - Personally, I never seen the implementation of this function before preparing this talk
 - I literally followed the types to derive it
@@ -1983,8 +1880,30 @@ def fuse[A, B, F[_]: Functor](fromA: A => F[A],
   b
 
 ???
-- It may be hard to believe but this mechanically derived function actually achieves our goal
-- And can be used like this
+- It may be hard to believe but this function, derived by just following the types, actually achieves our goal
+- But before we can actually use it, we need to have a `Functor` instance for our `ExpStep` type
+---
+
+## Fusing
+
+```
+sealed trait ExpStep[+A] {
+  def map[B](f: A => B): ExpStep[B] = this match {
+    case AddStep(a, b) => AddStep(f(a), f(b))
+    
+    case MulStep(a, b) => MulStep(f(a), f(b))
+    
+    case ValStep(x) => ValStep(x)
+  }
+}
+```
+
+???
+- The implementation is straightforward
+- We just go case by case over our datatype and apply `f` to its contents
+- Except `ValStep` which doesn't have anything relevant to `f`, and so we just ignore it
+- And now we can use our `fuse` function, like this:
+
 --
 ```
 val exp2 = BinaryOp(Mult, Val2(4), 
@@ -1999,7 +1918,7 @@ fuse(toExpStep, evalStep)(exp2)
 - Then on the way up it converts the leaves into numbers and combines them on every step
 --
 
-.quoteBox.followTheTypes[
+.quoteBox.fusing[
 >We make the brain perfect before we <br /> blow it out.
 ]
 
@@ -2082,7 +2001,6 @@ MulStep(4,  6)
 
 ???
 
-- Ignorance is strength
 - We need to strive to remove as much specific knowledge from the code as possible
 --
 
@@ -2094,14 +2012,17 @@ MulStep(4,  6)
 --
 - Use ignorance to your advantage
 
-.quoteBox.ignoranceIsStrength[
-> All ambiguities and shades of meaning <br /> had been purged out of the words. <br /> So far as it could be achieved, a Newspeak word was simply a staccato sound expressing one clearly understood concept.
-]
-
 ???
 - We can use this ignorance to our advantage
 - Be it by determining some aspect of the implementation 
 - Or by allowing the compiler to help us construct the code for us
+- And so, indeed, ignorance is strength
+
+---
+
+.quoteBox.ignoranceIsStrength[
+> All ambiguities and shades of meaning <br /> had been purged out of the words. <br /> So far as it could be achieved, a Newspeak word was simply a staccato sound expressing one clearly understood concept.
+]
 
 ---
 
@@ -2119,8 +2040,8 @@ IGNORANCE IS STRENGTH
 - To sum up
 - We've seen here how each of these slogans maps into a useful programming idea
 - War on effects brings peace to our code
-- Freedom on level of code is slavery on another
-- And ignorance can be leveraged to help us reason about code and write it
+- Freedom on one level of the code is slavery on another
+- And ignorance can be leveraged to help us reason about code, as well as help us write it
 
 ---
 
@@ -2153,7 +2074,7 @@ IGNORANCE IS STRENGTH
 
 ---
 
-class: transition, middle
+class: transition, middle, future
 
 > If you want a picture of the future, imagine a boot stamping on a human face ‒ forever.
 
