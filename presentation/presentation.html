@@ -36,7 +36,7 @@ class: center, middle, transition, intro
 ???
 
 - The book was written in 1948, and so happens in the "future"
-- And that future is quite bleak, under the totalitarian regime of:
+- And that future is quite bleak, under the regime of:
 --
 
 - The Party
@@ -594,8 +594,7 @@ eval(Mul(Val(3), Val(4)))
 
 ???
 - Multiplicity means that a single computation can yield multiple results
-- I just find that name a bit confusing in our case
-- Anyways, that's exactly what the hero of the book experiences
+- That's exactly what the hero of the book experiences
 - Somehow the result of two and two can be many things at once
 - How can we model it with types?
 ---
@@ -643,6 +642,7 @@ eval { // List(18, 24, 30, 40)
 ???
 - But in the background the monad comprehension is actually doing all the hard work for us
 - By gathering all possible results of evaluation into a single list of results
+- Again, by being at war with effect, our code remains in peace
 - This concludes our war
 
 ---
@@ -1188,9 +1188,8 @@ case Add(a, b) =>
 - This is the translation of the `for` comprehension syntax back into `flatMap`s
 - We never fully used the freedom that was given to us
 - Since the second action, `rule` of `b` is independent of the result of the first action, `rule` of `a`
-- There really isn't any need to chain them one after another like that
-- But since that was the interface that we were given, we invoked it anyways
-- So we never had a chance to get the errors that we wanted
+- We abused the freedom that was given to us
+- And the price for it is that we cannot accumulate errors, we have to short-circuit the computation
 - What can we do about that? What we need is some way to remove that excessive freedom from our interface
 - Well, `Monad` is not the only abstraction we can use
 
@@ -1244,15 +1243,12 @@ trait Monad[F[_]] extends Applicative[F] {
 ```
 
 ???
-- Which actually extends the functionality of `Applicative`
-- And it's impossible to implement `flatMap` with only `map2` and `unit`
+- It's impossible to implement `flatMap` with only `map2` and `unit`
 - But what's important for our purposes is that `map2` doesn't give us too much freedom
-- If we think of `F` as some kind of action
-- Then `map2` lets us combine two actions into one
-- But notice how the two actions are independent of each other
-- And so we are not free to choose `F` of `B` based on `F` of `A` result, it is already predetermined for us
-- This constraint, or lack of freedom, gives us a way to extract information that was not possible with `Monad`
-- In our case, this will let us collect errors, let's see how
+- Actions combined with `map2` are independent of each other
+- We do not have the freedom to choose one action based on the output of the other
+- This constraint, or lack of freedom, is what will enable us to accumulate errors
+- Let's see how
 ---
 
 ## Applicative Censorship
@@ -1297,14 +1293,11 @@ def map2[A, B, C](fa: Censorship[A], fb: Censorship[B])
 - So we can define `map2`
 - Given the two actions, `F` of `A` and `F` of `B`
 - We can inspect the two values and choose the appropriate outcome
-- If both cases are a `Pass`, we can invoke the provide function on their results
+- If both cases are a `Pass`, we can invoke the provided function on their results
 - If one of the cases failed, we propagate that failure and ignore the input function
 - The last case, the crucial one for our purpose, is when both inputs fail
 - In this case, we create a failed value, but we combine the errors from both sides
 - And that gives us the exact behavior that we wanted, error accumulation
-- We see here how constraining the freedom of the interface, helps us extract more information from the computation
-- Since the second action is independent of the first, there isn't the freedom to choose it based on previous result
-- We can look at the shape of both actions, and gather information on both of them, thus error accumulation
 
 ---
 
@@ -1375,6 +1368,7 @@ rule(Add(Val(7),
 
 ???
 - As you can see, we now have all three errors for the same expression
+- By limiting the freedom of the code, we've managed to achieve our goal
 - To conclude:
 
 ---
@@ -1388,7 +1382,7 @@ rule(Add(Val(7),
 - When giving freedom on one level, we are bound to pay for it on another
 - We are enslaved to the consequences of that freedom
 - This can be the risk of producing incorrect values as in the first example
-- Or the inability to gain information about the structure of a computation, like in the second
+- Or the inability to extract some output from a computation, like in the second
 - Even more generally, limiting the freedom of code helps us reason about what it does
 - The less it can do, the more we can figure out about what it actually does
 --
@@ -1661,7 +1655,8 @@ def print(e: Exp): String = e match {
 - Then combine the two values into another `A` and pass it on
 - The common part is the recursion, the actual logic of each function is just how to combine the `A` values
 - We could write code that somehow factors out the common recursion pattern into a higher-order function
-- Like we did with `flatMap`, but really, the problem runs deeper than these functions
+- Like we did with `chainNullable`
+- But really, the problem runs deeper than these functions
 
 --
 ```
@@ -1775,7 +1770,7 @@ def fuse[A, B](fromA: A => ExpStep[A],
 ```
 
 ???
-- Here we've just replace all type arguments with type parameters
+- Here we've just replaced all type arguments with type parameters
 - It can be read as follows:
 - Given a function that builds an `ExpStep` from `A`
 - And a function that reduces an `ExpStep` of `B` into a `B`
@@ -1924,8 +1919,6 @@ fuse(toExpStep, evalStep)(exp2)
 
 ???
 - The fact that we could work on such an abstract level and get the right result just blows my mind
-- The `fuse` function is more commonly known as a 'hylomorphism'
-- And it's just one of the many building blocks of the subject called "recursion schemes"
 - And in case you don't believe me that we are traversing the tree up and down only once
 - We can trace the execution of this call
 ---
@@ -2069,7 +2062,9 @@ IGNORANCE IS STRENGTH
 - And the Typeclassopedia resource contains many useful abstractions along the lines of Functors and the like
 - "Constraints Liberate, Liberties Constrain" is a talk by Rúnar Bjarnason that gives deeper insight on how freedom on one level is slavery on another
 - The idea of parametricity that I handwaved about is formalized in Wadler's article
-- The topic of recursion schemes, of which the `fuse` function is just an example has been popularized in Meijer, et al's. article
+- The `fuse` function is more commonly known as a 'hylomorphism'
+- And it's just one of the many building blocks of the subject called "recursion schemes"
+- The topic of recursion schemes, was popularized in Meijer, et al's. article
 - The last item, which is a series of blog posts is a somewhat more accessible introduction to the topic
 
 ---
