@@ -651,35 +651,22 @@ eval { // List(18, 24, 30, 40)
 
 - Recognize your enemies
 
+- Deconstruct their essence
+
+- Be at constant war
+
+- Let your code live in peace
+
 ???
 - To recap
 - We should recognize the enemies in our code for what they are
 - Effects, such as nullability and exceptions
-
---
-
-- Deconstruct their essence
-
-???
 - Look at their essence and represent it in an explicit way - a type
-
---
-
-- Be at constant war
-
-???
 - Along with the type, find an interface that hides away the noise left by that enemy
 - Preferably some well understood abstraction, like the `Monad` we used in the examples
-
---
-
-- Let your code live in peace
-
-
-
-???
 - Once you've done all that, having opened an all out war against the various effects
 - Your code can be truly be in peace
+
 ---
 
 .quoteBox.warIsPeace[
@@ -1377,6 +1364,9 @@ rule(Add(Val(7),
 
 - Freedom on one level is slavery on another
 
+- Dispense as much freedom as necessary, but no more
+
+- Freedom can be quantified
 ???
 
 - When giving freedom on one level, we are bound to pay for it on another
@@ -1385,25 +1375,17 @@ rule(Add(Val(7),
 - Or the inability to extract some output from a computation, like in the second
 - Even more generally, limiting the freedom of code helps us reason about what it does
 - The less it can do, the more we can figure out about what it actually does
---
 
-- Dispense as much freedom as necessary, but no more
-
-???
 - Of course we cannot take away all of the freedom from the code, since then it won't be usable
 - For example, we could not rewrite our example using `Functor`
 - It's too weak for that purpose, it doesn't give us enough freedom to do much at all
 - Hence we should choose the right amount of freedom, and give exactly that
 - But no more, since then we are at the risk of being enslaved again
 
---
-
-- Freedom can be quantified
-
-???
 - Once you start using well-defined mathematical abstractions like `Functor`, `Applicative` and `Monad` and the many others available to you
 - Freedom becomes something that can be quantified
 - And you can choose the right amount of freedom by going up and down the abstraction ladder
+
 ---
 
 .quoteBox.freedomIsSlavery[
@@ -1484,30 +1466,9 @@ def addTwo[A](a: A): A {{content}}
 - This property that helps us reason about the code is called parametricity
 - Which in our case translates to: the less we know about our inputs, the more our outputs are constrained
 - So we can deduce some facts about parametric functions, from ignorance we've gained strength
-- Of course, one can implement the identity function oh so many times
-- Here's another function
---
-
-def doSomething(is: List[Int]): List[Int]
-
-
-def doSomething[A](as: List[A]): List[A]
-
-{{content}}
-
-???
-- Here we have the same problem as with the first function
-- We are operating on a concrete type, we know everything there is to know about it
-- So the solution space is huge, an we can't really say what this function does
-- But we can erase the knowledge about the type, like so
-- Since this function is more complicated than the identity function
-- I can't actually determine its implementation from its signature
-- But I can still say something about it
-- Whatever it returns, it must be a subset (with duplications) of the original input
-- This is true, since we can't create generic values of type `A` out of thin air
-- They must come from the input
-- Ignorance significantly constrained the implementation for us
-- Apart from helping us reason about functions, ignorance can also help us with catching bugs
+- Of course, not all parametric functions can be uniquely determined like the identity function
+- But the points still stands, parametricity helps us reason about code
+- Not only that, ignorance can also help us with catching bugs
 --
 
 def swap(x: (Int, Int)): (Int, Int) = (x._1, x._2)
@@ -1992,20 +1953,17 @@ MulStep(4,  6)
 
 - Purge as much knowledge as possible
 
-???
-
-- We need to strive to remove as much specific knowledge from the code as possible
---
-
 - Keep the code blissfully ignorant of its context
 
-???
-- Not knowing the context in which the code is running restricts what it can do 
-- Since it cannot use any specific details about its input to determine the result
---
 - Use ignorance to your advantage
 
 ???
+
+- We need to strive to remove as much specific knowledge from the code as possible
+
+- Not knowing the context in which the code is running restricts what it can do 
+- Since it cannot use any specific details about its input to determine the result
+
 - We can use this ignorance to our advantage
 - Be it by determining some aspect of the implementation 
 - Or by allowing the compiler to help us construct the code for us
