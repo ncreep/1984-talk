@@ -15,10 +15,9 @@ class: center, middle, transition, intro
 .caption[Daniel Beskin]
 ???
 
-- This talk is inspired by George Orwell's book: 1984 
+- This talk is inspired by George Orwell's 1984 
 - Although the book paints quite a negative picture of reality 
-- In this talk, I'm going to try and show you how we can translate ideas from the book into good programming practices
-- Especially in the world of type-functional programming
+- In this talk, I'm going to try and show you how we can translate ideas from the book into useful programming practices
 - But first, a quick recap of the book
 
 ---
@@ -35,8 +34,7 @@ class: center, middle, transition, intro
 
 ???
 
-- The book was written in 1948, and so happens in the "future"
-- And that future is quite bleak, under the regime of:
+- The book describes a bleak, dystopian future, under the regime of:
 --
 
 - The Party
@@ -70,11 +68,8 @@ class: center, middle, transition, intro
 
 - Some examples of Newspeak words
 - Thoughtcrime: as it sounds, is the act of thinking something which is forbidden by the Party
-- The thought police is the one responsible for catching thoughtcriminals
 - An Unperson: a term used for someone that was "vaporized" and had been completely wiped out from existence and retroactively from history
-- Which happens quite a lot in the book
 - The term "double plus ungood" is an example of how Newspeak removes redundancy from the language by reusing few small pieces
-- Instead of keeping both the word "good" and "bad", we can reuse "good", with a generic prefix for negation
 - And the focus of the talk:
 ---
 ## The Slogans
@@ -90,7 +85,6 @@ IGNORANCE IS STRENGTH
 ???
 - These are the slogans of the party (reads them out loud)
 - Of course, these slogans may seem somewhat excessively negative
-- How could we possibly use them for anything constructive?
 - But, as we are going to see during the talk, each slogan maps neatly into concrete techniques that can be used to improve our programs
 - So, we are going to go over the slogans, one by one, and explore this connection
 ---
@@ -188,11 +182,9 @@ InputData getFieldQuery(Form form,  MetaData meta) {
 - The point is, that this code embraces a number of enemies, and tries to live with them in peace
 - These are:
 - Side effects and mutability that pollute the code, making reasoning about it more difficult
-- The usage of `null`s, that is propagated everywhere, covering the code with repetitive `null` checks
-- Exceptions, that need to be explicitly handled and wrapped around
-- And just as with `null`s, once we start using them, they pollute the code all around us
-- The last enemy is a bit more subtle
-- It is the code in this loop, which forces the code to do some gymnastics (including side-effects) in order to perform the same bit of a code a number times
+- The usage of `null`s, that obfuscate the meaning of the code
+- Exceptions, that make it harder to follow the control flow
+- And multiplicity, which is what happens we try to apply the same piece of code a number times
 - All of these enemies are instances "effects" in our code
 - Effects tend to make code more difficult to read, write and comprehend
 - And this is peace, we've embraced these enemies, and let them leave peacefully in our code
@@ -2031,6 +2023,7 @@ class: transition, middle, future
 
 > If you want a picture of the future, imagine a boot stamping on a human face ‒ forever.
 
+.questions.centered[Questions?]
 
 
 </textarea>
