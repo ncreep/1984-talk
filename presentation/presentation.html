@@ -58,7 +58,7 @@ class: center, middle, transition, intro
 
 ???
 - Newspeak
-- Which a language that was specifically designed to limit the freedom of thought
+- Which is a language that was specifically designed to limit the freedom of thought
 --
 
   - Thoughtcrime
@@ -557,7 +557,7 @@ def eval(e: Exp): Except[String, Int] = e match {
 }
 ```
 ???
-- In this case multiplication has is a forbidden action
+- In this case multiplication is a forbidden action
 - Notice how little the code changed, only in the place where we actually producing the error
 - The core logic is still in the "happy path", with the exceptions handled in the background by `flatMap`
 
@@ -1457,9 +1457,9 @@ def addTwo[A](a: A): A {{content}}
 - Which is the only possible implementation (given that we ignore the enemies on the previous slide)
 - This property that helps us reason about the code is called parametricity
 - Which in our case translates to: the less we know about our inputs, the more our outputs are constrained
-- So we can deduce some facts about parametric functions, from ignorance we've gained strength
+- So we can deduce some facts about parametric functions, so from ignorance we've gained strength
 - Of course, not all parametric functions can be uniquely determined like the identity function
-- But the points still stands, parametricity helps us reason about code
+- But the point still stands, parametricity helps us reason about code
 - Not only that, ignorance can also help us with catching bugs
 --
 
